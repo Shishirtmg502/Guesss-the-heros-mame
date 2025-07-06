@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎬 Guess the Drama Hero!</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #fceabb, #f8b500);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 40px;
+      color: #333;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 30px;
+      color: #fff;
+      text-shadow: 2px 2px #000;
+    }
+    #game-container {
+      background-color: #fff8dc;
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      margin: auto;
+    }
+    #hero-img {
+      width: 100%;
+      max-width: 350px;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 15px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+    #guess-box {
+      margin-top: 20px;
+    }
+    input[type="text"] {
+      padding: 12px;
+      font-size: 1.1em;
+      width: 80%;
+      max-width: 280px;
+      border-radius: 10px;
+      border: 2px solid #f8b500;
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 1.1em;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      background-color: #f8b500;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #d48c00;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    #score {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+    #correct-name {
+      margin-top: 15px;
+      font-size: 1.1em;
+      color: #b10000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎬 Guess the Drama Hero!</h1>
+  <div id="game-container">
+    <img id="hero-img" src="https://via.placeholder.com/300x400?text=Drama+Hero" alt="Drama Hero">
+    <div id="guess-box">
+      <input type="text" id="guess" placeholder="Enter hero's name">
+      <br>
+      <button onclick="checkAnswer()">Submit</button>
+    </div>
+    <div id="result"></div>
+    <div id="correct-name"></div>
+    <div id="score">Score: 0</div>
+  </div>
+
+  <script>
+    const heroes = [
+      { name: "Hyun Bin", img: "hyunbin.jpg" },
+      { name: "Lee Min Ho", img: "leeminhoo.jpg" },
+      { name: "rabin angeles", img: "rabinangeles.jpg" },
+      { name: "Park Seo Joon", img: "parkseejun.jpg" },
+      { name: "Kim Soo Hyun", img: "kimsoohun.jpg" },
+      { name: "V", img: "V.jpg" },
+      { name: "Lee Jong Suk", img: "leejongsuk.jpg" },
+      { name: "Nam Joo Hyuk", img: "namejoohyuk.jpg" },
+      { name: "Gong Yoo", img: "gongyoo.jpg" },
+      { name: "Kim Seon Ho", img: "kimseonho.jpg" },
+      { name: "Jung Hae In", img: "junghaein.jpg" },
+      { name: "Park Bo Gum", img: "park.jpg" },
+      { name: "Cha Eun Woo", img: "cha.jpg" }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let gameEnded = false;
+    let chances = 3;
+    let waiting = false;
+
+    function normalize(text) {
+      return text.toLowerCase().replace(/\s+/g, '').trim();
+    }
+
+    function loadHero() {
+      if (gameEnded) return;
+      document.getElementById('hero-img').src = heroes[current].img;
+      document.getElementById('guess').value = "";
+      document.getElementById('guess').disabled = false;
+      document.getElementById('result').innerText = "";
+      document.getElementById('correct-name').innerText = "";
+      chances = 3;
+      waiting = false;
+    }
+
+    function checkAnswer() {
+      if (gameEnded || waiting) return;
+
+      const guess = normalize(document.getElementById('guess').value);
+      const correct = normalize(heroes[current].name);
+
+      if (guess === correct) {
+        score++;
+        document.getElementById('score').innerText = `Score: ${score}`;
+        document.getElementById('result').innerText = "✅ Correct!";
+        waiting = true;
+        setTimeout(() => {
+          nextHero();
+        }, 1000);
+      } else {
+        chances--;
+        if (chances > 0) {
+          document.getElementById('result').innerText = `❌ Wrong! You have ${chances} ${chances === 1 ? "chance" : "chances"} left.`;
+        } else {
+          document.getElementById('result').innerText = `❌ Wrong!`;
+          document.getElementById('correct-name').innerText = `It was: ${heroes[current].name}`;
+          document.getElementById('guess').disabled = true;
+          waiting = true;
+          setTimeout(() => {
+            nextHero();
+          }, 3000); // wait 3 seconds then move to next
+        }
+      }
+    }
+
+    function nextHero() {
+      current++;
+      if (current >= heroes.length) {
+        endGame();
+      } else {
+        loadHero();
+      }
+    }
+
+    function endGame() {
+      gameEnded = true;
+      document.getElementById('game-container').innerHTML = `
+        <h2>🎉 Game Over!</h2>
+        <p>Your final score is: <strong>${score}/${heroes.length}</strong></p>
+        <p style="font-size: 2em;">
+          ${
+            score <= heroes.length / 3
+              ? "😂 You need to watch more dramas!"
+              : score <= (heroes.length * 2) / 3
+              ? "😊 Not bad!"
+              : "🌟 Excellent! You're a true drama fan!"
+          }
+        </p>
+      `;
+    }
+
+    loadHero();
+  </script>
+</body>
+</html>
